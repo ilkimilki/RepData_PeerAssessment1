@@ -102,6 +102,7 @@ ggplot(activity_day1, aes( steps)) + geom_histogram(binwidth=250)
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
+The histogram above shows that there are fewer days with no steps reported after missing activity values have been imputed, but the overall shape of the histogram is conserved compared to the original data.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -119,3 +120,4 @@ ggplot(activity_mean_wt, aes(interval, steps,color=weekday_weekend)) + geom_line
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
+The walking activity is shifted to later hours in the day at weekends, with the activity spread more evenly over the day.
