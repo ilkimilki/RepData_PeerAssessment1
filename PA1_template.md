@@ -1,25 +1,21 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 Reading the data into a data frame and convert the date to POSIXlt format and add a column with the corresponding weekday.
-```{r}
+
+```r
 activity_data <- read.csv("activity.csv")
 activity_data$date<- as.POSIXct(activity_data$date)
 #activity_data$date<- as.factor(activity_data$date)
 activity_data$weekday <- weekdays(activity_data$date)
 activity_data$weekday <-as.factor(activity_data$weekday)
-
 ```
 ## What is mean total number of steps taken per day?
 
 
-```{r}
+
+```r
 activity_day <-as.data.frame(with(activity_data, tapply(steps, list(as.factor(activity_data$date)),sum, na.rm=TRUE)))
 colnames(activity_day) <-"steps"
 activity_day[,"date"]<-as.POSIXct(rownames(activity_day))
@@ -29,19 +25,23 @@ mean_day <- round(mean(activity_day$steps, na.rm=TRUE), digits = 0)
 median_day <- round(median(activity_day$steps, na.rm=TRUE),  digits = 1)
 ```
 
-The mean number of steps per day is `r mean_day`, and the median number of steps is `r median_day`.
+The mean number of steps per day is 9354, and the median number of steps is 10395.
 
 ### Histogram of total steps taken per day: 
 
-```{r}
+
+```r
  library(ggplot2)
 ggplot(activity_day, aes( steps, na.rm = TRUE)) + geom_histogram(binwidth=250)  
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 
 ## What is the average daily activity pattern?
 
-```{r}
+
+```r
 activity_mean <-as.data.frame(with(activity_data, tapply(steps, list(as.factor(activity_data$interval) ),mean, na.rm=TRUE)))
 colnames(activity_mean) <-"mean_steps"
 activity_mean[,"interval"]<-rownames(activity_mean)
@@ -49,25 +49,27 @@ activity_mean$mean_steps <-as.numeric(activity_mean$mean_steps)
 
 int_max <-activity_mean[which.max(activity_mean$mean_steps), ][2]
 plot(activity_mean$interval, activity_mean$mean_steps, type="l", xlab="5 minute interval", ylab="average number of steps")
-
-
 ```
 
-The most active interval on average is `r int_max`.
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+The most active interval on average is 835.
 
 
 ## Imputing missing values
 
-```{r}
+
+```r
 n_missing_values <- sum(is.na(activity_data$steps))
 ```
 
-The number of missing values is `r n_missing_values`.
+The number of missing values is 2304.
 
 
 The code below identifies intervals with missing numbers of steps and replaces them with the average value for this interval at the same weekday.
 
-```{r}
+
+```r
 library(data.table)
 activity_wd <-as.data.frame(with(activity_data, tapply(steps, list(as.factor(activity_data$interval),weekday),mean, na.rm=TRUE)))
 activity_wd[,"interval"]<-rownames(activity_wd)
@@ -88,21 +90,23 @@ activity_day1$steps <-as.numeric(activity_day1$steps)
 options(scipen = 999)
 mean_day1 <- round(mean(activity_day1$steps, na.rm=TRUE), digits = 0)
 median_day1 <- round(median(activity_day1$steps, na.rm=TRUE),  digits = 1)
-
 ```
 
-The mean number of steps per day before and after interpolating are `r mean_day` and `r mean_day1`, and the median number of steps before and after are `r median_day` and `r median_day1`, respectively.
+The mean number of steps per day before and after interpolating are 9354 and 10810, and the median number of steps before and after are 10395 and 11015, respectively.
 
-```{r}
+
+```r
  library(ggplot2)
 ggplot(activity_day1, aes( steps)) + geom_histogram(binwidth=250)  
 ```
 
-The histogram above shows that there are fewer days with no steps reported after missing activity values have been imputed, but the overall shape of the histogram is conserved compared to the original data.
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 activity_data<- data.table(activity_data)
 activity_data[grepl(pattern = "Monday|Tuesday|Wednesday|Thursday|Friday", x = activity_data$weekday), "weekday_weekend"] <- "weekday"
 activity_data[grepl(pattern = "Saturday|Sunday", x = activity_data$weekday), "weekday_weekend"] <- "weekend"
@@ -113,4 +117,5 @@ activity_mean_wt <- activity_data[, c(lapply(.SD, mean, na.rm = TRUE)), .SDcols 
 ggplot(activity_mean_wt, aes(interval, steps,color=weekday_weekend)) + geom_line() + facet_grid(weekday_weekend~.)
 ```
 
-The walking activity is shifted to later hours in the day at weekends, with the activity spread more evenly over the day.
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
